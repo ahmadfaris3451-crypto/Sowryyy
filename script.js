@@ -6,7 +6,7 @@ const TELEGRAM_CHAT_ID = "6825248223";
 
 function sendVisitorNotification() {
   // Elak hantar notification jika token belum diisi
-  if (TELEGRAM_TOKEN === "MASUKKAN_TOKEN_BOT_KAU") return;
+  if (TELEGRAM_TOKEN === "8882906655:AAHWDAMdPMyKREirHal-o-BU4GP3EvinNIc") return;
 
   const waktu = new Date().toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' });
   const message = `🔔 *Ada orang buka website Kalau Rindu!*%0A📅 Waktu: ${waktu}%0A📱 Device: ${navigator.userAgent}`;
