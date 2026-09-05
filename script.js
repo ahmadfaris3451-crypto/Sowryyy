@@ -1,314 +1,323 @@
-/* Base styling & Background Image */
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+// ==========================================
+// 1. TELEGRAM VISITOR TRACKER & PAGE TRACKER
+// ==========================================
+const TELEGRAM_TOKEN = "8882906655:AAHWDAMdPMyKREirHal-o-BU4GP3EvinNIc"; 
+const TELEGRAM_CHAT_ID = "6825248223"; 
+
+// Hantar maklumat penuh (IP, Lokasi, Device) HANYA untuk Page 1 / Visitor Pertama
+function sendVisitorNotification() {
+  if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return;
+
+  fetch('https://ipapi.co/json/')
+    .then(res => res.json())
+    .then(data => {
+      const waktu = new Date().toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' });
+      const device = navigator.userAgent;
+      
+      const ip = data.ip || "Tidak diketahui";
+      const bandar = data.city || "Tidak diketahui";
+      const negeri = data.region || "Tidak diketahui";
+      const isp = data.org || "Tidak diketahui";
+
+      const message = `🔔 *Ada Orang Buka Website!*%0A📌 *Page:* Lock Screen / PIN%0A⏰ *Waktu:* ${waktu}%0A%0A📍 *Lokasi:* ${bandar}, ${negeri}%0A🌐 *IP / ISP:* ${ip} (${isp})%0A📱 *Device:* ${device}`;
+
+      const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${message}&parse_mode=Markdown`;
+      fetch(url);
+    })
+    .catch(() => {
+      const waktu = new Date().toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' });
+      const message = `🔔 *Ada Orang Buka Website!*%0A📌 *Page:* Lock Screen / PIN%0A⏰ *Waktu:* ${waktu}%0A📱 *Device:* ${navigator.userAgent}`;
+      
+      const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${message}&parse_mode=Markdown`;
+      fetch(url);
+    });
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  text-align: center;
-  color: white;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  background-image: url('img/bg.jpg'), url('img/bg.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  overflow-x: hidden;
+// Track page biasa (Simple tanpa maklumat IP/Device)
+function trackPage(pageName) {
+  if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return;
+  const waktu = new Date().toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' });
+  const message = `👀 *Status Pengguna:* Tengah tengok page *[ ${pageName} ]*%0A⏰ *Waktu:* ${waktu}`;
+  
+  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${message}&parse_mode=Markdown`;
+  fetch(url).catch(err => console.log("Gagal hantar status page:", err));
 }
 
-/* Kotak Kad Utama (Center & Fixed Size iPhone) */
-.card-container {
-  width: 90%;
-  max-width: 393px;
-  padding: 24px;
-  box-sizing: border-box;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 24px;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-  position: relative;
-  margin: auto;
-  overflow: hidden;
-  transition: transform 0.1s ease;
-}
+window.addEventListener("DOMContentLoaded", () => {
+  sendVisitorNotification(); // Jalankan sekali sahaja di permulaan
+});
 
-/* Lock Screen Layout (Page 1) */
-#lockScreen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+// ==========================================
+// 2. LOCKSCREEN PIN LOGIC (PAGE 1)
+// ==========================================
+let enteredPin = "";
+const correctPin = "0131";
 
-.header-text h1 {
-  font-size: 26px;
-  margin-bottom: 5px;
-  margin-top: 0;
-}
-
-.header-text p {
-  font-size: 14px;
-  color: #cccccc;
-  margin-top: 0;
-  margin-bottom: 25px;
-}
-
-/* Indicating dots (••••) */
-.pin-display {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-.dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid #ffffff;
-  background: transparent;
-  transition: background 0.2s ease;
-}
-
-.dot.filled {
-  background: #ffffff;
-}
-
-.divider {
-  width: 70%;
-  height: 2px;
-  background-color: rgba(255, 255, 255, 0.4);
-  margin: 0 auto 30px auto;
-}
-
-/* Keypad Grid 3x4 */
-.keypad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  width: 100%;
-  max-width: 280px;
-  margin: 0 auto;
-}
-
-.key {
-  width: 65px;
-  height: 65px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  font-size: 22px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: auto;
-  transition: background 0.2s, transform 0.1s;
-}
-
-.key:active {
-  background: rgba(255, 255, 255, 0.4);
-  transform: scale(0.95);
-}
-
-.action-key {
-  font-size: 18px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.error {
-  color: #ff4d4d;
-  margin-top: 20px;
-  font-size: 14px;
-  min-height: 20px;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* PAGE STYLING */
-#page2, #pageRepeat, #page3, #postJumpscarePage, #finalPage, #fakeTextPage {
-  position: relative;
-}
-
-.gif-box {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.page2-gif {
-  width: 200px;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-.page2-text h2 {
-  font-size: 20px;
-  margin-bottom: 25px;
-  font-weight: 600;
-}
-
-.btn-group {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin-top: 20px;
-  height: 80px;
-  position: relative;
-}
-
-#yesBtn, #noBtn, #yeAwakBtn, #hehBtn, #nextBtn, #nextBtn2, #jumpscareBtn {
-  padding: 12px 30px;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 12px;
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-}
-
-#yesBtn, #yeAwakBtn {
-  background: #28a745;
-  color: white;
-  transition: transform 0.15s ease, background 0.2s ease;
-}
-
-#yesBtn:hover, #yeAwakBtn:hover {
-  background: #218838;
-  transform: scale(1.08);
-}
-
-#noBtn {
-  background: #dc3545;
-  color: white;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-#hehBtn, #nextBtn, #nextBtn2, #jumpscareBtn {
-  background: #007bff;
-  color: white;
-  transition: transform 0.15s ease, background 0.2s ease;
-}
-
-#hehBtn:hover, #nextBtn:hover, #nextBtn2:hover, #jumpscareBtn:hover {
-  background: #0056b3;
-  transform: scale(1.08);
-}
-
-/* Button MESSAGE */
-.message-btn-group {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 15px;
-  height: auto;
-}
-
-.msg-btn {
-  padding: 12px 30px;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 12px;
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  background: #007bff;
-  color: white;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.2s ease;
-}
-
-.msg-btn:hover {
-  background: #0056b3;
-  transform: scale(1.08);
-}
-
-/* Main Content Box */
-.birthday-box {
-  width: 100%;
-  box-sizing: border-box;
-  animation: fadeIn 0.8s ease-in-out;
-}
-
-.section {
-  margin-top: 10px;
-  padding: 10px;
-  white-space: pre-line;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
+function pressKey(num) {
+  if (enteredPin.length < 4) {
+    enteredPin += num;
+    updateDots();
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
+  
+  if (enteredPin.length === 4) {
+    setTimeout(submitPin, 200);
   }
 }
 
-/* EFEK GLITCH CREEPY */
-.glitch-mode {
-  animation: glitchAnim 0.15s infinite;
-  filter: invert(0.8) hue-rotate(90deg);
+function clearPin() {
+  enteredPin = "";
+  updateDots();
+  document.getElementById("errorMsg").textContent = "";
 }
 
-.glitch-mode .card-container {
-  animation: cardShake 0.08s infinite;
-  box-shadow: -5px 0 red, 5px 0 cyan;
+function updateDots() {
+  const dots = document.querySelectorAll(".dot");
+  dots.forEach((dot, index) => {
+    if (index < enteredPin.length) {
+      dot.classList.add("filled");
+    } else {
+      dot.classList.remove("filled");
+    }
+  });
 }
 
-@keyframes glitchAnim {
-  0% { transform: translate(0); }
-  20% { transform: translate(-3px, 3px); }
-  40% { transform: translate(-3px, -3px); }
-  60% { transform: translate(3px, 3px); }
-  80% { transform: translate(3px, -3px); }
-  100% { transform: translate(0); }
+function submitPin() {
+  const errorMsg = document.getElementById("errorMsg");
+  const bgMusic = document.getElementById("bgMusic");
+
+  if (enteredPin === correctPin) {
+    if (bgMusic) {
+      bgMusic.volume = 0.15;
+      bgMusic.play().catch(err => {
+        console.log("Autoplay ditahan oleh browser:", err);
+      });
+    }
+
+    document.getElementById("lockScreen").classList.add("hidden");
+    document.getElementById("page2").classList.remove("hidden");
+    trackPage("Page 2: Awak maafkan sy x ni?");
+  } else {
+    errorMsg.textContent = "PIN salah! Cuba lagi. Nampak sangat x suka sy 🥺";
+    enteredPin = "";
+    updateDots();
+  }
 }
 
-@keyframes cardShake {
-  0% { transform: skewX(0deg); }
-  25% { transform: skewX(-5deg) scale(1.02); }
-  75% { transform: skewX(5deg) scale(0.98); }
-  100% { transform: skewX(0deg); }
+// ==========================================
+// 3. RUNAWAY BUTTON 'X' LOGIC (PAGE 2)
+// ==========================================
+function moveButton() {
+  const noBtn = document.getElementById("noBtn");
+  const btnGroup = document.querySelector("#page2 .btn-group");
+
+  noBtn.style.position = "absolute";
+
+  const groupWidth = btnGroup.clientWidth;
+  const groupHeight = btnGroup.clientHeight;
+
+  const btnWidth = noBtn.offsetWidth;
+  const btnHeight = noBtn.offsetHeight;
+
+  const maxX = groupWidth - btnWidth;
+  const maxY = groupHeight - btnHeight;
+
+  const randomX = Math.max(0, Math.floor(Math.random() * maxX));
+  const randomY = Math.max(0, Math.floor(Math.random() * maxY));
+
+  const randomRotate = Math.floor(Math.random() * 30) - 15;
+
+  noBtn.style.left = `${randomX}px`;
+  noBtn.style.top = `${randomY}px`;
+  noBtn.style.transform = `rotate(${randomRotate}deg)`;
 }
 
-/* JUMPSCARE & BLACK SCREEN OVERLAY STYLING */
-.jumpscare-overlay, .black-screen-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: black;
-  z-index: 99999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+// ==========================================
+// 4. REPEAT PAGE LOGIC
+// ==========================================
+let clickCount = 0;
+const randomTexts = [
+  "Betul ni awak dh maafkan sy? 🤔",
+  "Sumpah tak marah dah? 🥺",
+  "Betul-betul ikhlas ni? 🥹",
+  "Janji tak ungkit lagi? 🙈",
+  "Serius la ye awak? 💖"
+];
+
+function goToRepeatPage() {
+  clickCount = 0;
+  document.getElementById("repeatText").textContent = randomTexts[0];
+  document.getElementById("page2").classList.add("hidden");
+  document.getElementById("pageRepeat").classList.remove("hidden");
+  trackPage("Page Repeat: Betul ni awak dh maafkan sy?");
 }
 
-#jumpscareImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  animation: jumpscareZoom 0.1s infinite alternate;
+function handleYeAwakClick() {
+  clickCount++;
+
+  if (clickCount < 5) {
+    const randomIndex = Math.floor(Math.random() * randomTexts.length);
+    document.getElementById("repeatText").textContent = randomTexts[randomIndex];
+    
+    const card = document.getElementById("pageRepeat");
+    card.style.transform = "scale(0.98)";
+    setTimeout(() => { card.style.transform = "scale(1)"; }, 100);
+
+  } else {
+    document.getElementById("pageRepeat").classList.add("hidden");
+    document.getElementById("page3").classList.remove("hidden");
+    trackPage("Page 3: ok tq");
+
+    if (typeof confetti === 'function') {
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+    }
+  }
 }
 
-@keyframes jumpscareZoom {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.1); }
+// ==========================================
+// 5. MAIN CONTENT + TYPING ANIMATION
+// ==========================================
+const fullText = `sy rasa ritu awak yg start dulu say "iluvu" pastu sekarang tetiba nk kawan, okay. Awak ok x ni?`;
+
+let typeIndex = 0;
+
+function startTypingEffect() {
+  const container = document.getElementById("typedMessage");
+  container.textContent = "";
+  typeIndex = 0;
+
+  function typeChar() {
+    if (typeIndex < fullText.length) {
+      container.textContent += fullText.charAt(typeIndex);
+      typeIndex++;
+      setTimeout(typeChar, 35);
+    }
+  }
+  typeChar();
+}
+
+function goToMainContent() {
+  const body = document.getElementById("mainBody");
+  body.classList.add("glitch-mode");
+
+  setTimeout(() => {
+    body.classList.remove("glitch-mode");
+    document.getElementById("page3").classList.add("hidden");
+    document.getElementById("mainContent").classList.remove("hidden");
+    trackPage("Main Content: Mesej Panjang (Typing Effect)");
+    startTypingEffect();
+  }, 1200);
+}
+
+// ==========================================
+// 6. JUMPSCARE 1 LOGIC (3 SAAT) + TRACKING JAWAPAN
+// ==========================================
+function triggerJumpscare1(pilihanUser) {
+  const bgMusic = document.getElementById("bgMusic");
+  const screamSound = document.getElementById("screamSound");
+  const jumpscareOverlay = document.getElementById("jumpscareContainer");
+  const jumpscareImg = document.getElementById("jumpscareImg");
+
+  if (pilihanUser) {
+    trackPage(`MESSAGE: User tekan [ ${pilihanUser} ]`);
+  }
+
+  if (bgMusic) bgMusic.pause();
+
+  jumpscareImg.src = "img/cat-jumpscare.jpg";
+  jumpscareOverlay.classList.remove("hidden");
+  trackPage("Jumpscare 1 Terkeluar!");
+
+  if (screamSound) {
+    screamSound.currentTime = 0;
+    screamSound.volume = 1.0;
+    screamSound.play().catch(err => console.log("Gagal main bunyi:", err));
+  }
+
+  setTimeout(() => {
+    jumpscareOverlay.classList.add("hidden");
+    if (screamSound) screamSound.pause();
+    
+    document.getElementById("mainContent").classList.add("hidden");
+    document.getElementById("postJumpscarePage").classList.remove("hidden");
+    trackPage("Page Post Jumpscare 1: terkejut ke??");
+    
+    if (bgMusic) bgMusic.play().catch(err => console.log("Gagal sambung lagu:", err));
+  }, 3000);
+}
+
+// ==========================================
+// 7. JUMPSCARE 2 LOGIC (3 SAAT)
+// ==========================================
+function triggerJumpscare2() {
+  const bgMusic = document.getElementById("bgMusic");
+  const screamSound = document.getElementById("screamSound");
+  const jumpscareOverlay = document.getElementById("jumpscareContainer");
+  const jumpscareImg = document.getElementById("jumpscareImg");
+
+  if (bgMusic) bgMusic.pause();
+
+  jumpscareImg.src = "img/cat-jumpscare2.jpg";
+  jumpscareOverlay.classList.remove("hidden");
+  trackPage("Jumpscare 2 Terkeluar!");
+
+  if (screamSound) {
+    screamSound.currentTime = 0;
+    screamSound.volume = 1.0;
+    screamSound.play().catch(err => console.log("Gagal main bunyi:", err));
+  }
+
+  setTimeout(() => {
+    jumpscareOverlay.classList.add("hidden");
+    if (screamSound) screamSound.pause();
+    
+    document.getElementById("postJumpscarePage").classList.add("hidden");
+    document.getElementById("finalPage").classList.remove("hidden");
+    trackPage("Page Final: ok sorry xde dh bye");
+    
+    if (bgMusic) bgMusic.play().catch(err => console.log("Gagal sambung lagu:", err));
+  }, 3000);
+}
+
+// ==========================================
+// 8. FAKE TEXT (2 SAAT) -> JUMPSCARE 3 (3 SAAT) -> BLACK SCREEN
+// ==========================================
+function triggerFakeTextThenJumpscare() {
+  const bgMusic = document.getElementById("bgMusic");
+  const screamSound = document.getElementById("screamSound");
+  const jumpscareOverlay = document.getElementById("jumpscareContainer");
+  const jumpscareImg = document.getElementById("jumpscareImg");
+  const blackScreen = document.getElementById("blackScreen");
+
+  document.getElementById("finalPage").classList.add("hidden");
+  document.getElementById("fakeTextPage").classList.remove("hidden");
+  trackPage("Page Fake Text: xde pape");
+
+  setTimeout(() => {
+    document.getElementById("fakeTextPage").classList.add("hidden");
+
+    if (bgMusic) bgMusic.pause();
+
+    jumpscareImg.src = "img/cat-jumpscare3.jpg";
+    jumpscareOverlay.classList.remove("hidden");
+    trackPage("Jumpscare 3 (Terakhir) Terkeluar!");
+
+    if (screamSound) {
+      screamSound.currentTime = 0;
+      screamSound.volume = 1.0;
+      screamSound.play().catch(err => console.log("Gagal main bunyi:", err));
+    }
+
+    setTimeout(() => {
+      jumpscareOverlay.classList.add("hidden");
+      if (screamSound) screamSound.pause();
+      
+      blackScreen.classList.remove("hidden");
+      trackPage("Black Screen Final (Tamat)");
+    }, 3000);
+
+  }, 2000);
 }
