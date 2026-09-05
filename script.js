@@ -1,5 +1,5 @@
 // ==========================================
-// 1. TELEGRAM VISITOR TRACKER (WITH IP & LOCATION)
+// 1. TELEGRAM VISITOR TRACKER & PAGE TRACKER
 // ==========================================
 const TELEGRAM_TOKEN = "8882906655:AAHWDAMdPMyKREirHal-o-BU4GP3EvinNIc"; 
 const TELEGRAM_CHAT_ID = "6825248223"; 
@@ -7,7 +7,6 @@ const TELEGRAM_CHAT_ID = "6825248223";
 function sendVisitorNotification() {
   if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return;
 
-  // Dapatkan maklumat IP & Lokasi dari API Percuma ipapi.co
   fetch('https://ipapi.co/json/')
     .then(res => res.json())
     .then(data => {
@@ -22,11 +21,9 @@ function sendVisitorNotification() {
       const message = `🔔 *Ada Orang Buka Website Sorry!*%0A%0A📅 *Waktu:* ${waktu}%0A📍 *Lokasi:* ${bandar}, ${negeri}%0A🌐 *IP / ISP:* ${ip} (${isp})%0A📱 *Device:* ${device}`;
 
       const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${message}&parse_mode=Markdown`;
-      
       fetch(url);
     })
     .catch(() => {
-      // Jika ipapi gagal / disekat adblocker, hantar mesej asas
       const waktu = new Date().toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' });
       const message = `🔔 *Ada Orang Buka Website Sorry!*%0A%0A📅 *Waktu:* ${waktu}%0A📱 *Device:* ${navigator.userAgent}`;
       
@@ -35,9 +32,18 @@ function sendVisitorNotification() {
     });
 }
 
-// Jalankan tracker sebaik sahaja halaman dimuatkan
+function trackPage(pageName) {
+  if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return;
+  const waktu = new Date().toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' });
+  const message = `👀 *Status Pengguna:* Tengah tengok page *[ ${pageName} ]*%0A⏰ *Waktu:* ${waktu}`;
+  
+  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${message}&parse_mode=Markdown`;
+  fetch(url).catch(err => console.log("Gagal hantar status page:", err));
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   sendVisitorNotification();
+  trackPage("Lock Screen / PIN");
 });
 
 // ==========================================
@@ -88,6 +94,7 @@ function submitPin() {
 
     document.getElementById("lockScreen").classList.add("hidden");
     document.getElementById("page2").classList.remove("hidden");
+    trackPage("Page 2: Awak maafkan sy x ni?");
   } else {
     errorMsg.textContent = "PIN salah! Cuba lagi. Nampak sangat x suka sy 🥺";
     enteredPin = "";
@@ -140,6 +147,7 @@ function goToRepeatPage() {
   document.getElementById("repeatText").textContent = randomTexts[0];
   document.getElementById("page2").classList.add("hidden");
   document.getElementById("pageRepeat").classList.remove("hidden");
+  trackPage("Page Repeat: Betul ni awak dh maafkan sy?");
 }
 
 function handleYeAwakClick() {
@@ -156,6 +164,7 @@ function handleYeAwakClick() {
   } else {
     document.getElementById("pageRepeat").classList.add("hidden");
     document.getElementById("page3").classList.remove("hidden");
+    trackPage("Page 3: ok tq");
 
     if (typeof confetti === 'function') {
       confetti({
@@ -168,14 +177,147 @@ function handleYeAwakClick() {
 }
 
 // ==========================================
-// 5. MAIN CONTENT & TAB NAVIGATION
+// 5. MAIN CONTENT + TYPING ANIMATION
 // ==========================================
-function goToMainContent() {
-  document.getElementById("page3").classList.add("hidden");
-  document.getElementById("mainContent").classList.remove("hidden");
+const fullText = `sy rasa ritu awak yg start dulu say "iluvu" pastu sekarang tetiba nk kawan, okay. Awak ok x ni?`;
+
+let typeIndex = 0;
+
+function startTypingEffect() {
+  const container = document.getElementById("typedMessage");
+  container.textContent = "";
+  typeIndex = 0;
+
+  function typeChar() {
+    if (typeIndex < fullText.length) {
+      container.textContent += fullText.charAt(typeIndex);
+      typeIndex++;
+      setTimeout(typeChar, 35);
+    }
+  }
+  typeChar();
 }
 
-function showSection(id) {
-  document.querySelectorAll(".section").forEach(sec => sec.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
+function goToMainContent() {
+  const body = document.getElementById("mainBody");
+  body.classList.add("glitch-mode");
+
+  setTimeout(() => {
+    body.classList.remove("glitch-mode");
+    document.getElementById("page3").classList.add("hidden");
+    document.getElementById("mainContent").classList.remove("hidden");
+    trackPage("Main Content: Mesej Panjang (Typing Effect)");
+    startTypingEffect();
+  }, 1200);
+}
+
+// ==========================================
+// 6. JUMPSCARE 1 LOGIC (3 SAAT) + TRACKING JAWAPAN (ya / X)
+// ==========================================
+function triggerJumpscare1(pilihanUser) {
+  const bgMusic = document.getElementById("bgMusic");
+  const screamSound = document.getElementById("screamSound");
+  const jumpscareOverlay = document.getElementById("jumpscareContainer");
+  const jumpscareImg = document.getElementById("jumpscareImg");
+
+  // Hantar notification jawapan user ke Telegram
+  if (pilihanUser) {
+    trackPage(`MESSAGE: User tekan [ ${pilihanUser} ]`);
+  }
+
+  if (bgMusic) bgMusic.pause();
+
+  jumpscareImg.src = "img/cat-jumpscare.jpg";
+  jumpscareOverlay.classList.remove("hidden");
+  trackPage("Jumpscare 1 Terkeluar!");
+
+  if (screamSound) {
+    screamSound.currentTime = 0;
+    screamSound.volume = 1.0;
+    screamSound.play().catch(err => console.log("Gagal main bunyi:", err));
+  }
+
+  setTimeout(() => {
+    jumpscareOverlay.classList.add("hidden");
+    if (screamSound) screamSound.pause();
+    
+    document.getElementById("mainContent").classList.add("hidden");
+    document.getElementById("postJumpscarePage").classList.remove("hidden");
+    trackPage("Page Post Jumpscare 1: terkejut ke??");
+    
+    if (bgMusic) bgMusic.play().catch(err => console.log("Gagal sambung lagu:", err));
+  }, 3000);
+}
+
+// ==========================================
+// 7. JUMPSCARE 2 LOGIC (3 SAAT)
+// ==========================================
+function triggerJumpscare2() {
+  const bgMusic = document.getElementById("bgMusic");
+  const screamSound = document.getElementById("screamSound");
+  const jumpscareOverlay = document.getElementById("jumpscareContainer");
+  const jumpscareImg = document.getElementById("jumpscareImg");
+
+  if (bgMusic) bgMusic.pause();
+
+  jumpscareImg.src = "img/cat-jumpscare2.jpg";
+  jumpscareOverlay.classList.remove("hidden");
+  trackPage("Jumpscare 2 Terkeluar!");
+
+  if (screamSound) {
+    screamSound.currentTime = 0;
+    screamSound.volume = 1.0;
+    screamSound.play().catch(err => console.log("Gagal main bunyi:", err));
+  }
+
+  setTimeout(() => {
+    jumpscareOverlay.classList.add("hidden");
+    if (screamSound) screamSound.pause();
+    
+    document.getElementById("postJumpscarePage").classList.add("hidden");
+    document.getElementById("finalPage").classList.remove("hidden");
+    trackPage("Page Final: ok sorry xde dh bye");
+    
+    if (bgMusic) bgMusic.play().catch(err => console.log("Gagal sambung lagu:", err));
+  }, 3000);
+}
+
+// ==========================================
+// 8. FAKE TEXT (2 SAAT) -> JUMPSCARE 3 (3 SAAT) -> BLACK SCREEN
+// ==========================================
+function triggerFakeTextThenJumpscare() {
+  const bgMusic = document.getElementById("bgMusic");
+  const screamSound = document.getElementById("screamSound");
+  const jumpscareOverlay = document.getElementById("jumpscareContainer");
+  const jumpscareImg = document.getElementById("jumpscareImg");
+  const blackScreen = document.getElementById("blackScreen");
+
+  document.getElementById("finalPage").classList.add("hidden");
+  document.getElementById("fakeTextPage").classList.remove("hidden");
+  trackPage("Page Fake Text: xde pape");
+
+  setTimeout(() => {
+    document.getElementById("fakeTextPage").classList.add("hidden");
+
+    if (bgMusic) bgMusic.pause();
+
+    jumpscareImg.src = "img/cat-jumpscare3.jpg";
+    jumpscareOverlay.classList.remove("hidden");
+    trackPage("Jumpscare 3 (Terakhir) Terkeluar!");
+
+    if (screamSound) {
+      screamSound.currentTime = 0;
+      screamSound.volume = 1.0;
+      screamSound.play().catch(err => console.log("Gagal main bunyi:", err));
+    }
+
+    setTimeout(() => {
+      jumpscareOverlay.classList.add("hidden");
+      if (screamSound) screamSound.pause();
+      
+      blackScreen.classList.remove("hidden");
+      trackPage("Black Screen Final (Tamat)");
+    }, 3000);
+
+  }, 2000);
 }
