@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
-<body>
+<body id="mainBody">
 
   <div class="card-container" id="lockScreen">
     <div class="header-text">
@@ -76,7 +76,7 @@
     </div>
 
     <div class="page2-text">
-      <h2>yayyy! Tq , lup you. ❤️</h2>
+      <h2>ok tq</h2>
     </div>
 
     <div class="btn-group" style="justify-content: center;">
@@ -86,53 +86,64 @@
 
   <div class="card-container hidden" id="mainContent">
     <div class="birthday-box">
-      <h1>From my heart ❤️</h1>
-      <div class="menu">
-        <div class="card" onclick="showSection('memory')">📸 Pretty</div>
-        <div class="card" onclick="showSection('message')">💌 Message</div>
-        <div class="card" onclick="showSection('harapan')">✨ Harapan</div>
+      <h1>MESSAGE</h1>
+      
+      <div class="section">
+        <p id="typedMessage"></p>
       </div>
 
-      <div id="memory" class="section hidden">
-        <h2>Pretty Girl</h2>
-        <div class="slideshow">
-          <img src="img/faris1.jpg" onerror="this.onerror=null; this.src='img/faris1.png';" alt="memory 1">
-          <img src="img/faris2.jpg" onerror="this.onerror=null; this.src='img/faris2.png';" alt="memory 2">
-          <img src="img/faris3.jpg" onerror="this.onerror=null; this.src='img/faris3.png';" alt="memory 3">
-        </div>
+      <!-- Hantar parameter 'ya' atau 'X' ke fungsi triggerJumpscare1 -->
+      <div class="btn-group message-btn-group">
+        <button id="yesMessageBtn" class="msg-btn" onclick="triggerJumpscare1('ya')">ya</button>
+        <button id="xMessageBtn" class="msg-btn" onclick="triggerJumpscare1('X')">X</button>
       </div>
-
-      <div id="message" class="section hidden">
-        <h2>Ucapan Ikhlas</h2>
-        <div class="gif-box" style="margin-top: 10px;">
-          <img src="img/message.gif" alt="Message GIF" class="section-gif" onerror="this.onerror=null; this.src='img/surprise.gif';">
-        </div>
-        <p>Hi awak, sy nk minta maaf sangat-sangat atas apa yg sy buat.sy tahu sy ni x perfect sy ni :
-
-- suka buat awak marah
-- overthinking
-- xde duit
-- mindset sampah
-- suka nekan2
-- buat awak x selesa
-- x pandai
-- DRY
-- late reply
-
-tapi sy betul2 suka awak, nk wat cane. sy rindu awak yg sebelum ni, selalu cari sy untuk cerita ape yg jadi. salah sy juga terlampau overthinking sampai buatkan awak x selesa. Sy mengaku silap sy. Awak dh lh masatu penat kerja, mesti serabutkan dengan sy ni. sy betul2 minta maaf. Sy buat website ni besar tau effortnya, belajar dari 0. Bukan senang2 sy nk buat benda macam ni. jd sy betul2 minta maaf....</div>
-
-      <div id="harapan" class="section hidden">
-        <h2>My Hopes & Wishes</h2>
-        <div class="gif-box" style="margin-top: 10px;">
-          <img src="img/harapan.gif" alt="Harapan GIF" class="section-gif" onerror="this.onerror=null; this.src='img/surprise.gif';">
-        </div>
-        <p>Sy harap awak dptlh maafkan sy. Kalau boleh jujur jelh ngan sy betul ke awak suka sy, kalo xleh xpelah. kalau boleh update lh kat sy apa2, sy sentiasa menunggu cerita2 dari awak. Sy appreciate sangat kalau awak update nk gi kerja ke macam sebelum ni, itupun dh cukup bagi sy. Kalo xleh xpelah. Sy tahu awak penat kerja, sy respect gila2 awak. Betul2 rajin awak cari duit.Sy harap awak dpt lh beli ape yg awak nk tu tablet. Awak x rindu ke nk call sy, hehehehhe. Xpelah..... Chat pun xpelh, sy tengah tunggu awak kat WhatsApp ni cepatlh chat............</div>
     </div>
   </div>
 
+  <!-- PAGE LEPAS JUMPSCARE 1 -->
+  <div class="card-container hidden" id="postJumpscarePage">
+    <div class="page2-text">
+      <h2>terkejut ke?? padan muka, ok sorry x buat dh.</h2>
+    </div>
+
+    <div class="btn-group" style="justify-content: center; margin-top: 20px; height: auto;">
+      <button id="nextBtn2" onclick="triggerJumpscare2()">next</button>
+    </div>
+  </div>
+
+  <!-- PAGE PENUTUP (LEPAS JUMPSCARE 2) -->
+  <div class="card-container hidden" id="finalPage">
+    <div class="page2-text">
+      <h2>ok sorry xde dh bye, jangan tekan button bawah ni.</h2>
+    </div>
+
+    <div class="btn-group" style="justify-content: center; margin-top: 20px; height: auto;">
+      <button id="jumpscareBtn" onclick="triggerFakeTextThenJumpscare()">jumpscare</button>
+    </div>
+  </div>
+
+  <!-- PAGE "XDE PAPE" -->
+  <div class="card-container hidden" id="fakeTextPage">
+    <div class="page2-text" style="margin-bottom: 0;">
+      <h2>xde pape</h2>
+    </div>
+  </div>
+
+  <!-- CONTAINER JUMPSCARE -->
+  <div id="jumpscareContainer" class="jumpscare-overlay hidden">
+    <img src="img/cat-jumpscare.jpg" alt="Jumpscare Cat" id="jumpscareImg">
+  </div>
+
+  <!-- BLACK SCREEN FINAL -->
+  <div id="blackScreen" class="black-screen-overlay hidden"></div>
+
+  <!-- AUDIO BACKGROUND & JUMPSCARE -->
   <audio id="bgMusic" loop>
     <source src="img/bg-music.mp3" type="audio/mpeg">
-    Browser anda tidak menyokong elemen audio.
+  </audio>
+
+  <audio id="screamSound" preload="auto">
+    <source src="img/scream.mp3" type="audio/mpeg">
   </audio>
 
   <script src="script.js"></script>
