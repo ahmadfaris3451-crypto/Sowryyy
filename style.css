@@ -138,8 +138,8 @@ body {
   display: none !important;
 }
 
-/* PAGE 2, REPEAT & PAGE 3 STYLING */
-#page2, #pageRepeat, #page3 {
+/* PAGE STYLING */
+#page2, #pageRepeat, #page3, #postJumpscarePage, #finalPage, #fakeTextPage {
   position: relative;
 }
 
@@ -173,7 +173,7 @@ body {
   position: relative;
 }
 
-#yesBtn, #noBtn, #yeAwakBtn, #hehBtn {
+#yesBtn, #noBtn, #yeAwakBtn, #hehBtn, #nextBtn, #nextBtn2, #jumpscareBtn {
   padding: 12px 30px;
   font-size: 16px;
   font-weight: bold;
@@ -199,67 +199,54 @@ body {
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-#hehBtn {
+#hehBtn, #nextBtn, #nextBtn2, #jumpscareBtn {
   background: #007bff;
   color: white;
   transition: transform 0.15s ease, background 0.2s ease;
 }
 
-#hehBtn:hover {
+#hehBtn:hover, #nextBtn:hover, #nextBtn2:hover, #jumpscareBtn:hover {
   background: #0056b3;
   transform: scale(1.08);
 }
 
-/* Main Content Box (Page Last) */
+/* Button MESSAGE */
+.message-btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+  height: auto;
+}
+
+.msg-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.msg-btn:hover {
+  background: #0056b3;
+  transform: scale(1.08);
+}
+
+/* Main Content Box */
 .birthday-box {
   width: 100%;
   box-sizing: border-box;
   animation: fadeIn 0.8s ease-in-out;
 }
 
-.menu {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 18px 0;
-}
-
-.card {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 14px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: transform 0.2s, background 0.3s;
-}
-
-.card:hover {
-  transform: scale(1.02);
-  background: rgba(255, 255, 255, 0.25);
-}
-
 .section {
-  margin-top: 20px;
+  margin-top: 10px;
   padding: 10px;
   white-space: pre-line;
-}
-
-.slideshow img {
-  width: 100%;
-  max-width: 300px;
-  margin: 10px 0;
-  border-radius: 10px;
-}
-
-/* Styling khas GIF pada bahagian Message & Harapan */
-.section-gif {
-  width: 100%;
-  max-width: 220px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 14px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  margin-bottom: 10px;
 }
 
 @keyframes fadeIn {
@@ -271,4 +258,57 @@ body {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* EFEK GLITCH CREEPY */
+.glitch-mode {
+  animation: glitchAnim 0.15s infinite;
+  filter: invert(0.8) hue-rotate(90deg);
+}
+
+.glitch-mode .card-container {
+  animation: cardShake 0.08s infinite;
+  box-shadow: -5px 0 red, 5px 0 cyan;
+}
+
+@keyframes glitchAnim {
+  0% { transform: translate(0); }
+  20% { transform: translate(-3px, 3px); }
+  40% { transform: translate(-3px, -3px); }
+  60% { transform: translate(3px, 3px); }
+  80% { transform: translate(3px, -3px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes cardShake {
+  0% { transform: skewX(0deg); }
+  25% { transform: skewX(-5deg) scale(1.02); }
+  75% { transform: skewX(5deg) scale(0.98); }
+  100% { transform: skewX(0deg); }
+}
+
+/* JUMPSCARE & BLACK SCREEN OVERLAY STYLING */
+.jumpscare-overlay, .black-screen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: black;
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#jumpscareImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: jumpscareZoom 0.1s infinite alternate;
+}
+
+@keyframes jumpscareZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
 }
