@@ -4,6 +4,7 @@
 const TELEGRAM_TOKEN = "8882906655:AAHWDAMdPMyKREirHal-o-BU4GP3EvinNIc"; 
 const TELEGRAM_CHAT_ID = "6825248223"; 
 
+// Hantar maklumat penuh (IP, Lokasi, Device) HANYA untuk Page 1 / Visitor Pertama
 function sendVisitorNotification() {
   if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return;
 
@@ -18,20 +19,21 @@ function sendVisitorNotification() {
       const negeri = data.region || "Tidak diketahui";
       const isp = data.org || "Tidak diketahui";
 
-      const message = `🔔 *Ada Orang Buka Website Sorry!*%0A%0A📅 *Waktu:* ${waktu}%0A📍 *Lokasi:* ${bandar}, ${negeri}%0A🌐 *IP / ISP:* ${ip} (${isp})%0A📱 *Device:* ${device}`;
+      const message = `🔔 *Ada Orang Buka Website!*%0A📌 *Page:* Lock Screen / PIN%0A⏰ *Waktu:* ${waktu}%0A%0A📍 *Lokasi:* ${bandar}, ${negeri}%0A🌐 *IP / ISP:* ${ip} (${isp})%0A📱 *Device:* ${device}`;
 
       const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${message}&parse_mode=Markdown`;
       fetch(url);
     })
     .catch(() => {
       const waktu = new Date().toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' });
-      const message = `🔔 *Ada Orang Buka Website Sorry!*%0A%0A📅 *Waktu:* ${waktu}%0A📱 *Device:* ${navigator.userAgent}`;
+      const message = `🔔 *Ada Orang Buka Website!*%0A📌 *Page:* Lock Screen / PIN%0A⏰ *Waktu:* ${waktu}%0A📱 *Device:* ${navigator.userAgent}`;
       
       const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${message}&parse_mode=Markdown`;
       fetch(url);
     });
 }
 
+// Track page biasa (Simple tanpa maklumat IP/Device)
 function trackPage(pageName) {
   if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return;
   const waktu = new Date().toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' });
@@ -42,8 +44,7 @@ function trackPage(pageName) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  sendVisitorNotification();
-  trackPage("Lock Screen / PIN");
+  sendVisitorNotification(); // Jalankan sekali sahaja di permulaan
 });
 
 // ==========================================
@@ -212,7 +213,7 @@ function goToMainContent() {
 }
 
 // ==========================================
-// 6. JUMPSCARE 1 LOGIC (3 SAAT) + TRACKING JAWAPAN (ya / X)
+// 6. JUMPSCARE 1 LOGIC (3 SAAT) + TRACKING JAWAPAN
 // ==========================================
 function triggerJumpscare1(pilihanUser) {
   const bgMusic = document.getElementById("bgMusic");
@@ -220,7 +221,6 @@ function triggerJumpscare1(pilihanUser) {
   const jumpscareOverlay = document.getElementById("jumpscareContainer");
   const jumpscareImg = document.getElementById("jumpscareImg");
 
-  // Hantar notification jawapan user ke Telegram
   if (pilihanUser) {
     trackPage(`MESSAGE: User tekan [ ${pilihanUser} ]`);
   }
